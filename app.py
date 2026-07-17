@@ -7,6 +7,7 @@ from src.file_reader import (
 from src.matcher import calculate_tfidf_similarity
 from src.embedding_matcher import calculate_embedding_similarity
 from src.skill_extractor import get_skill_gap
+from src.learning_suggestions import get_learning_suggestions
 
 STOP_WORDS = {
     "i", "know", "looking", "for", "a", "an", "the",
@@ -109,9 +110,12 @@ if st.button("Check Match"):
                     "**Missing skills:**",
                     ", ".join(sorted(missing_skills))
                 )
+
+                suggestions = get_learning_suggestions(missing_skills)
+
+                st.subheader("Learning suggestions")
+
+                for suggestion in suggestions:
+                    st.markdown(f"- {suggestion}")
             else:
                 st.success("No known required skills are missing.")
-        else:
-            st.warning("Add meaningful keywords to the job description.")
-    else:
-        st.warning("Please upload/paste a resume and enter a job description.")
