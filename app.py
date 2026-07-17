@@ -10,6 +10,28 @@ from src.learning_suggestions import get_learning_suggestions
 from src.matcher import calculate_tfidf_similarity
 from src.skill_extractor import get_skill_gap
 from src.resume_advisor import get_resume_improvement_suggestions
+st.set_page_config(
+    page_title="AI Resume Matcher",
+    page_icon="📄",
+    layout="wide"
+)
+with st.sidebar:
+    st.header("About this app")
+    st.write(
+        "Compare a resume with a job description using keyword, "
+        "TF-IDF, and semantic similarity."
+    )
+
+    st.subheader("Features")
+    st.markdown(
+        "- PDF and DOCX upload\n"
+        "- Skill-gap analysis\n"
+        "- Learning suggestions\n"
+        "- Interview questions\n"
+        "- Resume improvement advice"
+    )
+
+    st.caption("Educational portfolio project.")
 
 STOP_WORDS = {
     "i", "know", "looking", "for", "a", "an", "the",
@@ -29,10 +51,12 @@ def get_keywords(text):
 
 
 st.title("AI Resume Matcher")
-st.write(
-    "Upload a PDF/DOCX resume or paste resume text to compare it "
-    "with a job description."
+st.caption(
+    "Upload your resume, add a job description, and receive "
+    "AI-assisted matching insights."
 )
+st.divider()
+
 
 uploaded_resume = st.file_uploader(
     "Upload your resume as a PDF or DOCX file",
