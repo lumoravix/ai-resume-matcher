@@ -6,6 +6,7 @@ from src.file_reader import (
 )
 from src.matcher import calculate_tfidf_similarity
 from src.embedding_matcher import calculate_embedding_similarity
+from src.skill_extractor import get_skill_gap
 
 STOP_WORDS = {
     "i", "know", "looking", "for", "a", "an", "the",
@@ -61,7 +62,6 @@ job_description = st.text_area(
 
 if st.button("Check Match"):
     if resume_text and job_description:
-        resume_keywords = get_keywords(resume_text)
         job_keywords = get_keywords(job_description)
 
         if job_keywords:
@@ -75,8 +75,10 @@ if st.button("Check Match"):
                 job_description
             )
 
-            matching_keywords = resume_keywords.intersection(job_keywords)
-            missing_keywords = job_keywords - resume_keywords
+            matching_skills, missing_skills = get_skill_gap(
+                resume_text,
+                job_description
+            )
 
             tfidf_column, embedding_column = st.columns(2)
 
@@ -94,18 +96,21 @@ if st.button("Check Match"):
                 "sentence embeddings to compare context."
             )
 
-            st.write(
-                "**Matching keywords:**",
-                ", ".join(sorted(matching_keywords))
-            )
-
-            if missing_keywords:
+            if matching_skills:
                 st.write(
-                    "**Missing keywords:**",
-                    ", ".join(sorted(missing_keywords))
+                    "**Matching skills:**",
+                    ", ".join(sorted(matching_skills))
                 )
             else:
-                st.success("Excellent! No keywords are missing.")
+                st.info("No known matching skills were found.")
+
+            if missing_skills:
+                st.write(
+                    "**Missing skills:**",
+                    ", ".join(sorted(missing_skills))
+                )
+            else:
+                st.success("No known required skills are missing.")
         else:
             st.warning("Add meaningful keywords to the job description.")
     else:
