@@ -1,21 +1,14 @@
-import fitz
-from docx import Document
 import streamlit as st
+
+from src.file_reader import (
+    extract_text_from_docx,
+    extract_text_from_pdf,
+)
 
 STOP_WORDS = {
     "i", "know", "looking", "for", "a", "an", "the",
     "with", "and", "of", "to", "candidate"
 }
-
-
-def extract_text_from_docx(uploaded_file):
-    document = Document(uploaded_file)
-    paragraphs = []
-
-    for paragraph in document.paragraphs:
-        paragraphs.append(paragraph.text)
-
-    return "\n".join(paragraphs)
 
 
 def get_keywords(text):
@@ -31,7 +24,10 @@ def get_keywords(text):
 
 
 st.title("AI Resume Matcher")
-st.write("Upload a PDF resume or paste resume text to compare it with a job description.")
+st.write(
+    "Upload a PDF/DOCX resume or paste resume text to compare it "
+    "with a job description."
+)
 
 uploaded_resume = st.file_uploader(
     "Upload your resume as a PDF or DOCX file",
@@ -69,7 +65,6 @@ if st.button("Check Match"):
         if job_keywords:
             matching_keywords = resume_keywords.intersection(job_keywords)
             missing_keywords = job_keywords - resume_keywords
-
             match_score = len(matching_keywords) / len(job_keywords) * 100
 
             st.metric("Basic Match Score", f"{match_score:.0f}%")
@@ -87,6 +82,5 @@ if st.button("Check Match"):
                 st.success("Excellent! No keywords are missing.")
         else:
             st.warning("Add meaningful keywords to the job description.")
-
     else:
         st.warning("Please upload/paste a resume and enter a job description.")
