@@ -5,6 +5,7 @@ from src.file_reader import (
     extract_text_from_pdf,
 )
 from src.matcher import calculate_tfidf_similarity
+from src.embedding_matcher import calculate_embedding_similarity
 
 STOP_WORDS = {
     "i", "know", "looking", "for", "a", "an", "the",
@@ -69,13 +70,28 @@ if st.button("Check Match"):
                 job_description
             )
 
+            embedding_score = calculate_embedding_similarity(
+                resume_text,
+                job_description
+            )
+
             matching_keywords = resume_keywords.intersection(job_keywords)
             missing_keywords = job_keywords - resume_keywords
 
-            st.metric("TF-IDF Similarity Score", f"{tfidf_score:.0f}%")
+            tfidf_column, embedding_column = st.columns(2)
+
+            with tfidf_column:
+                st.metric("TF-IDF Score", f"{tfidf_score:.0f}%")
+
+            with embedding_column:
+                st.metric(
+                    "Semantic Match Score",
+                    f"{embedding_score:.0f}%"
+                )
+
             st.caption(
-                "This score uses important-word weighting, not simple "
-                "keyword counting."
+                "TF-IDF compares important words. Semantic matching uses "
+                "sentence embeddings to compare context."
             )
 
             st.write(
