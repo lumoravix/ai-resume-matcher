@@ -1,4 +1,5 @@
 import fitz
+from docx import Document
 import streamlit as st
 
 STOP_WORDS = {
@@ -7,18 +8,14 @@ STOP_WORDS = {
 }
 
 
-def extract_text_from_pdf(uploaded_file):
-    document = fitz.open(
-        stream=uploaded_file.getvalue(),
-        filetype="pdf"
-    )
+def extract_text_from_docx(uploaded_file):
+    document = Document(uploaded_file)
+    paragraphs = []
 
-    text = ""
+    for paragraph in document.paragraphs:
+        paragraphs.append(paragraph.text)
 
-    for page in document:
-        text += page.get_text()
-
-    return text
+    return "\n".join(paragraphs)
 
 
 def get_keywords(text):
@@ -37,13 +34,17 @@ st.title("AI Resume Matcher")
 st.write("Upload a PDF resume or paste resume text to compare it with a job description.")
 
 uploaded_resume = st.file_uploader(
-    "Upload your resume as a PDF",
-    type=["pdf"]
+    "Upload your resume as a PDF or DOCX file",
+    type=["pdf", "docx"]
 )
 
 if uploaded_resume is not None:
-    resume_text = extract_text_from_pdf(uploaded_resume)
-    st.success("Resume PDF uploaded and text extracted.")
+    if uploaded_resume.name.lower().endswith(".pdf"):
+        resume_text = extract_text_from_pdf(uploaded_resume)
+    else:
+        resume_text = extract_text_from_docx(uploaded_resume)
+
+    st.success("Resume uploaded and text extracted.")
 
     with st.expander("View extracted resume text"):
         st.write(resume_text)
