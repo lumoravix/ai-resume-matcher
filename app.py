@@ -9,6 +9,7 @@ from src.interview_questions import generate_interview_questions
 from src.learning_suggestions import get_learning_suggestions
 from src.matcher import calculate_tfidf_similarity
 from src.skill_extractor import get_skill_gap
+from src.resume_advisor import get_resume_improvement_suggestions
 
 STOP_WORDS = {
     "i", "know", "looking", "for", "a", "an", "the",
@@ -126,11 +127,13 @@ if st.button("Check Match"):
             )
 
             if questions:
-                st.subheader("Practice interview questions")
+                            advice = get_resume_improvement_suggestions(
+                embedding_score,
+                missing_skills
+            )
 
-                for number, question in enumerate(questions, start=1):
-                    st.write(f"{number}. {question}")
-        else:
-            st.warning("Add meaningful keywords to the job description.")
-    else:
-        st.warning("Please upload/paste a resume and enter a job description.")
+            if advice:
+                st.subheader("Resume improvement suggestions")
+
+                for item in advice:
+                    st.markdown(f"- {item}")
