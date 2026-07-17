@@ -4,6 +4,7 @@ from src.file_reader import (
     extract_text_from_docx,
     extract_text_from_pdf,
 )
+from src.matcher import calculate_tfidf_similarity
 
 STOP_WORDS = {
     "i", "know", "looking", "for", "a", "an", "the",
@@ -63,11 +64,20 @@ if st.button("Check Match"):
         job_keywords = get_keywords(job_description)
 
         if job_keywords:
+            tfidf_score = calculate_tfidf_similarity(
+                resume_text,
+                job_description
+            )
+
             matching_keywords = resume_keywords.intersection(job_keywords)
             missing_keywords = job_keywords - resume_keywords
-            match_score = len(matching_keywords) / len(job_keywords) * 100
 
-            st.metric("Basic Match Score", f"{match_score:.0f}%")
+            st.metric("TF-IDF Similarity Score", f"{tfidf_score:.0f}%")
+            st.caption(
+                "This score uses important-word weighting, not simple "
+                "keyword counting."
+            )
+
             st.write(
                 "**Matching keywords:**",
                 ", ".join(sorted(matching_keywords))
