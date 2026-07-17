@@ -1,9 +1,24 @@
+import fitz
 import streamlit as st
 
 STOP_WORDS = {
     "i", "know", "looking", "for", "a", "an", "the",
     "with", "and", "of", "to", "candidate"
 }
+
+
+def extract_text_from_pdf(uploaded_file):
+    document = fitz.open(
+        stream=uploaded_file.getvalue(),
+        filetype="pdf"
+    )
+
+    text = ""
+
+    for page in document:
+        text += page.get_text()
+
+    return text
 
 
 def get_keywords(text):
@@ -17,14 +32,27 @@ def get_keywords(text):
     keywords = set(words) - STOP_WORDS
     return keywords
 
-st.title("AI Resume Matcher")
-st.write("Paste your resume and a job description to check keyword overlap.")
 
-resume_text = st.text_area(
-    "Paste your resume here",
-    height=200,
-    placeholder="Example: I know Python, SQL, and Machine Learning..."
+st.title("AI Resume Matcher")
+st.write("Upload a PDF resume or paste resume text to compare it with a job description.")
+
+uploaded_resume = st.file_uploader(
+    "Upload your resume as a PDF",
+    type=["pdf"]
 )
+
+if uploaded_resume is not None:
+    resume_text = extract_text_from_pdf(uploaded_resume)
+    st.success("Resume PDF uploaded and text extracted.")
+
+    with st.expander("View extracted resume text"):
+        st.write(resume_text)
+else:
+    resume_text = st.text_area(
+        "Or paste your resume here",
+        height=200,
+        placeholder="Example: I know Python, SQL, and Machine Learning..."
+    )
 
 job_description = st.text_area(
     "Paste the job description here",
@@ -37,18 +65,27 @@ if st.button("Check Match"):
         resume_keywords = get_keywords(resume_text)
         job_keywords = get_keywords(job_description)
 
-        matching_keywords = resume_keywords.intersection(job_keywords)
-        missing_keywords = job_keywords - resume_keywords
+        if job_keywords:
+            matching_keywords = resume_keywords.intersection(job_keywords)
+            missing_keywords = job_keywords - resume_keywords
 
-        match_score = len(matching_keywords) / len(job_keywords) * 100
+            match_score = len(matching_keywords) / len(job_keywords) * 100
 
-        st.metric("Basic Match Score", f"{match_score:.0f}%")
-        st.write("**Matching keywords:**", ", ".join(matching_keywords))
+            st.metric("Basic Match Score", f"{match_score:.0f}%")
+            st.write(
+                "**Matching keywords:**",
+                ", ".join(sorted(matching_keywords))
+            )
 
-        if missing_keywords:
-            st.write("**Missing keywords:**", ", ".join(missing_keywords))
+            if missing_keywords:
+                st.write(
+                    "**Missing keywords:**",
+                    ", ".join(sorted(missing_keywords))
+                )
+            else:
+                st.success("Excellent! No keywords are missing.")
         else:
-            st.success("Excellent! No keywords are missing.")
+            st.warning("Add meaningful keywords to the job description.")
 
     else:
-        st.warning("Please fill in both boxes first.")
+        st.warning("Please upload/paste a resume and enter a job description.")
