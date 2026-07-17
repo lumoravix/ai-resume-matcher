@@ -7,10 +7,15 @@ STOP_WORDS = {
 
 
 def get_keywords(text):
-    words = text.lower().replace(",", " ").split()
+    punctuation = ",.!?:;()[]"
+    clean_text = text.lower()
+
+    for character in punctuation:
+        clean_text = clean_text.replace(character, " ")
+
+    words = clean_text.split()
     keywords = set(words) - STOP_WORDS
     return keywords
-
 
 st.title("AI Resume Matcher")
 st.write("Paste your resume and a job description to check keyword overlap.")
