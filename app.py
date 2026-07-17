@@ -1,13 +1,14 @@
 import streamlit as st
 
+from src.embedding_matcher import calculate_embedding_similarity
 from src.file_reader import (
     extract_text_from_docx,
     extract_text_from_pdf,
 )
-from src.matcher import calculate_tfidf_similarity
-from src.embedding_matcher import calculate_embedding_similarity
-from src.skill_extractor import get_skill_gap
+from src.interview_questions import generate_interview_questions
 from src.learning_suggestions import get_learning_suggestions
+from src.matcher import calculate_tfidf_similarity
+from src.skill_extractor import get_skill_gap
 
 STOP_WORDS = {
     "i", "know", "looking", "for", "a", "an", "the",
@@ -23,8 +24,7 @@ def get_keywords(text):
         clean_text = clean_text.replace(character, " ")
 
     words = clean_text.split()
-    keywords = set(words) - STOP_WORDS
-    return keywords
+    return set(words) - STOP_WORDS
 
 
 st.title("AI Resume Matcher")
@@ -119,3 +119,18 @@ if st.button("Check Match"):
                     st.markdown(f"- {suggestion}")
             else:
                 st.success("No known required skills are missing.")
+
+            questions = generate_interview_questions(
+                matching_skills,
+                missing_skills
+            )
+
+            if questions:
+                st.subheader("Practice interview questions")
+
+                for number, question in enumerate(questions, start=1):
+                    st.write(f"{number}. {question}")
+        else:
+            st.warning("Add meaningful keywords to the job description.")
+    else:
+        st.warning("Please upload/paste a resume and enter a job description.")
