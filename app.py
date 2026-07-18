@@ -151,7 +151,12 @@ if st.button("Check Match"):
             )
 
             if questions:
-                            advice = get_resume_improvement_suggestions(
+                st.subheader("Practice interview questions")
+
+                for question in questions:
+                    st.markdown(f"- {question}")
+
+            advice = get_resume_improvement_suggestions(
                 embedding_score,
                 missing_skills
             )
@@ -160,4 +165,4 @@ if st.button("Check Match"):
                 st.subheader("Resume improvement suggestions")
 
                 for item in advice:
-                    st.markdown(f"- {item}")
+                    st.markdown(f"- {item}")   
