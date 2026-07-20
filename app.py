@@ -121,6 +121,26 @@ if st.button("Check Match"):
                 "TF-IDF compares important words. Semantic matching uses "
                 "sentence embeddings to compare context."
             )
+            st.subheader("Match summary")
+
+            if embedding_score >= 70:
+                st.success(
+                    "Strong match: your resume is broadly aligned with this role."
+                )
+            elif embedding_score >= 40:
+                st.warning(
+                    "Partial match: you have some relevant strengths, but important "
+                    "requirements may be missing."
+                )
+            else:
+                st.error(
+                    "Low match: tailor your resume more closely to this job description."
+                )
+
+            st.write(
+                f"**Skills matched:** {len(matching_skills)} | "
+                f"**Skills missing:** {len(missing_skills)}"
+            )
 
             if matching_skills:
                 st.write(
