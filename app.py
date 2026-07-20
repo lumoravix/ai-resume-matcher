@@ -1,6 +1,9 @@
 import streamlit as st
 
-from src.embedding_matcher import calculate_embedding_similarity
+from src.embedding_matcher import (
+    calculate_embedding_similarity,
+    get_relevant_resume_points,
+)
 from src.file_reader import (
     extract_text_from_docx,
     extract_text_from_pdf,
@@ -8,13 +11,16 @@ from src.file_reader import (
 from src.interview_questions import generate_interview_questions
 from src.learning_suggestions import get_learning_suggestions
 from src.matcher import calculate_tfidf_similarity
-from src.skill_extractor import get_skill_gap
 from src.resume_advisor import get_resume_improvement_suggestions
+from src.skill_extractor import get_skill_gap
+
+
 st.set_page_config(
     page_title="AI Resume Matcher",
     page_icon="📄",
     layout="wide"
 )
+
 with st.sidebar:
     st.header("About this app")
     st.write(
@@ -26,12 +32,14 @@ with st.sidebar:
     st.markdown(
         "- PDF and DOCX upload\n"
         "- Skill-gap analysis\n"
+        "- AI-selected resume evidence\n"
         "- Learning suggestions\n"
         "- Interview questions\n"
         "- Resume improvement advice"
     )
 
     st.caption("Educational portfolio project.")
+
 
 STOP_WORDS = {
     "i", "know", "looking", "for", "a", "an", "the",
@@ -56,7 +64,6 @@ st.caption(
     "AI-assisted matching insights."
 )
 st.divider()
-
 
 uploaded_resume = st.file_uploader(
     "Upload your resume as a PDF or DOCX file",
@@ -87,10 +94,14 @@ job_description = st.text_area(
 )
 
 if st.button("Check Match"):
-    if resume_text and job_description:
+    if not resume_text or not job_description:
+        st.warning("Please provide both a resume and a job description.")
+    else:
         job_keywords = get_keywords(job_description)
 
-        if job_keywords:
+        if not job_keywords:
+            st.warning("Please enter a more detailed job description.")
+        else:
             tfidf_score = calculate_tfidf_similarity(
                 resume_text,
                 job_description
@@ -121,26 +132,40 @@ if st.button("Check Match"):
                 "TF-IDF compares important words. Semantic matching uses "
                 "sentence embeddings to compare context."
             )
+
             st.subheader("Match summary")
 
             if embedding_score >= 70:
                 st.success(
-                    "Strong match: your resume is broadly aligned with this role."
+                    "Strong match: your resume is broadly aligned with "
+                    "this role."
                 )
             elif embedding_score >= 40:
                 st.warning(
-                    "Partial match: you have some relevant strengths, but important "
-                    "requirements may be missing."
+                    "Partial match: you have some relevant strengths, but "
+                    "important requirements may be missing."
                 )
             else:
                 st.error(
-                    "Low match: tailor your resume more closely to this job description."
+                    "Low match: tailor your resume more closely to this "
+                    "job description."
                 )
 
             st.write(
                 f"**Skills matched:** {len(matching_skills)} | "
                 f"**Skills missing:** {len(missing_skills)}"
             )
+
+            relevant_points = get_relevant_resume_points(
+                resume_text,
+                job_description
+            )
+
+            if relevant_points:
+                st.subheader("AI-selected relevant resume evidence")
+
+                for point, score in relevant_points:
+                    st.markdown(f"- {point}")
 
             if matching_skills:
                 st.write(
@@ -185,4 +210,4 @@ if st.button("Check Match"):
                 st.subheader("Resume improvement suggestions")
 
                 for item in advice:
-                    st.markdown(f"- {item}")   
+                    st.markdown(f"- {item}")
