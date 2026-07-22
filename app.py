@@ -1,6 +1,7 @@
 import streamlit as st
 
 from src.embedding_matcher import calculate_embedding_similarity
+from src.cover_letter import generate_cover_letter
 from src.file_reader import (
     extract_text_from_docx,
     extract_text_from_pdf,
@@ -28,7 +29,8 @@ with st.sidebar:
         "- Skill-gap analysis\n"
         "- Learning suggestions\n"
         "- Interview questions\n"
-        "- Resume improvement advice"
+        "- Resume improvement advice\n"
+        "- Personalized cover-letter draft"
     )
 
     st.caption("Educational portfolio project.")
@@ -85,6 +87,20 @@ job_description = st.text_area(
     height=200,
     placeholder="Example: Looking for a candidate with Python and SQL..."
 )
+
+details_column, company_column = st.columns(2)
+
+with details_column:
+    job_title = st.text_input(
+        "Job title (optional)",
+        placeholder="Example: Data Analyst"
+    )
+
+with company_column:
+    company_name = st.text_input(
+        "Company name (optional)",
+        placeholder="Example: Acme Technologies"
+    )
 
 if st.button("Check Match"):
     if resume_text and job_description:
@@ -166,3 +182,20 @@ if st.button("Check Match"):
 
                 for item in advice:
                     st.markdown(f"- {item}")
+
+            cover_letter = generate_cover_letter(
+                matching_skills,
+                job_title,
+                company_name
+            )
+
+            st.subheader("Personalized cover-letter draft")
+            st.caption(
+                "Review and edit this draft before using it. Only keep "
+                "statements that are true for you."
+            )
+            st.text_area(
+                "Cover letter",
+                value=cover_letter,
+                height=360
+            )
