@@ -2,6 +2,10 @@
 
 A Streamlit web application that compares a resume with a job description and provides skill-gap analysis, similarity scores, interview questions, learning suggestions, and resume-improvement advice.
 
+## Live Demo
+[Open the live AI Resume Matcher](https://ai-resume-matcher-fmvvtzuv4eheefxjhw3v8x.streamlit.app/)
+
+
 ## Features
 
 - Upload resumes in PDF or DOCX format
@@ -13,6 +17,7 @@ A Streamlit web application that compares a resume with a job description and pr
 - Learning suggestions for missing skills
 - Practice interview questions based on skills
 - Resume-improvement suggestions
+- Personalized, editable cover-letter draft based on matching skills and optional job/company details
 
 ## Technologies Used
 
